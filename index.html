@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>あなたの栄養バランス診断 | Nutrition Check</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+    
+    <!-- Chart.js for the Radar Chart -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['"Noto Sans JP"', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            light: '#86EFAC', // green-300
+                            DEFAULT: '#22C55E', // green-500
+                            dark: '#15803D', // green-700
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            font-family: 'Noto Sans JP', sans-serif;
+            scroll-behavior: smooth;
+        }
+        .radio-label {
+            transition: all 0.2s;
+        }
+        /* Custom radio button styling */
+        input[type="radio"]:checked + label {
+            background-color: #22C55E;
+            color: white;
+            border-color: #22C55E;
+            transform: scale(1.05);
+        }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800">
+
+    <!-- Hero Section -->
+    <header class="relative bg-white overflow-hidden">
+        <div class="max-w-7xl mx-auto">
+            <div class="relative z-10 pb-8 bg-white sm:pb-16 md:pb-20 lg:max-w-2xl lg:w-full lg:pb-28 xl:pb-32">
+                <svg class="hidden lg:block absolute right-0 inset-y-0 h-full w-48 text-white transform translate-x-1/2" fill="currentColor" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+                    <polygon points="50,0 100,0 50,100 0,100" />
+                </svg>
+
+                <div class="relative pt-6 px-4 sm:px-6 lg:px-8">
+                    <nav class="relative flex items-center justify-between sm:h-10 lg:justify-start" aria-label="Global">
+                        <div class="flex items-center flex-grow flex-shrink-0 lg:flex-grow-0">
+                            <div class="flex items-center justify-between w-full md:w-auto">
+                                <a href="#">
+                                    <span class="sr-only">Nutrition Check</span>
+                                    <div class="flex items-center gap-2">
+                                        <div class="w-8 h-8 bg-brand rounded-full flex items-center justify-center text-white font-bold">N</div>
+                                        <span class="font-bold text-xl tracking-tight text-gray-900">Nutrition Check</span>
+                                    </div>
+                                </a>
+                            </div>
+                        </div>
+                    </nav>
+                </div>
+
+                <main class="mt-10 mx-auto max-w-7xl px-4 sm:mt-12 sm:px-6 md:mt-16 lg:mt-20 lg:px-8 xl:mt-28">
+                    <div class="sm:text-center lg:text-left">
+                        <h1 class="text-4xl tracking-tight font-extrabold text-gray-900 sm:text-5xl md:text-6xl">
+                            <span class="block xl:inline">あなたの食生活、</span>
+                            <span class="block text-brand">本当に足りていますか？</span>
+                        </h1>
+                        <p class="mt-3 text-base text-gray-500 sm:mt-5 sm:text-lg sm:max-w-xl sm:mx-auto md:mt-5 md:text-xl lg:mx-0">
+                            たった5つの質問に答えるだけで、今のあなたの栄養バランス状態を「見える化」します。まずは現状を知ることから始めましょう。
+                        </p>
+                        <div class="mt-5 sm:mt-8 sm:flex sm:justify-center lg:justify-start">
+                            <div class="rounded-md shadow">
+                                <a href="#survey" class="w-full flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-md text-white bg-brand hover:bg-brand-dark md:py-4 md:text-lg md:px-10">
+                                    診断をスタート
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </main>
+            </div>
+        </div>
+        <div class="lg:absolute lg:inset-y-0 lg:right-0 lg:w-1/2 bg-green-50">
+            <img class="h-56 w-full object-cover sm:h-72 md:h-96 lg:w-full lg:h-full opacity-80" src="https://images.unsplash.com/photo-1490645935967-10de6ba17061?ixlib=rb-1.2.1&auto=format&fit=crop&w=1950&q=80" alt="Healthy food bowl">
+        </div>
+    </header>
+
+    <!-- Survey Section -->
+    <section id="survey" class="py-12 bg-white sm:py-16">
+        <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-extrabold text-gray-900 sm:text-4xl">栄養バランスチェック</h2>
+                <p class="mt-4 text-lg text-gray-500">以下の5つの質問について、あなたの現状に最も近いものを選んでください。</p>
+            </div>
+
+            <form id="nutritionForm" class="space-y-10">
+                <!-- Question 1: Regularity -->
+                <div class="bg-gray-50 p-6 rounded-xl shadow-sm border border-gray-100">
+                    <h3 class="text-lg font-bold text-gray-900 mb-4 flex items-center">
+                        <span class="bg-brand text-white w-8 h-8 rounded-full flex items-center justify-center mr-3 text-sm">Q1</span>
+                        食事の時間は毎日決まっていますか？（朝食抜きや深夜の食事がない）
+                    </h3>
+                    <div class="grid grid-cols-5 gap-2 text-center">
+                        <div class="col-span-1 text-xs text-gray-400 mb-1">全く違う</div>
+                        <div class="col-span-3"></div>
+                        <div class="col-span-1 text-xs text-gray-400 mb-1">とてもそう思う</div>
+                    </div>
+                    <div class="flex justify-between items-center gap-2">
+                        <!-- Generate 5 radio buttons -->
+                        <div class="flex-1">
+                            <input type="radio" id="q1-1" name="q1" value="1" class="hidden" required>
+                            <label for="q1-1" class="radio-label block w-full py-3 text-center border-2 border-gray-200 rounded-lg cursor-pointer hover:border-brand-light font-bold text-gray-400">1</label>
+                        </div>
+                        <div class="flex-1">
+                            <input type="radio" id="q1-2" name="q1" value="2" class="hidden">
+                            <label for="q1-2" class="radio-label block w-full py-3 text-center border-2 border-gray-200 rounded-lg cursor-pointer hover:border-brand-light font-bold text-gray-400">2</label>
+                        </div>
+                        <div class="flex-1">
+                            <input type="radio" id="q1-3" name="q1" value="3" class="hidden">
+                            <label for="q1-3" class="radio-label block w-full py-3 text-center border-2 border-gray-200 rounded-lg cursor-pointer hover:border-brand-light font-bold text-gray-400">3</label>
+                        </div>
+                        <div class="flex-1">
+                            <input type="radio" id="q1-4" name="q1" value="4" class="hidden">
+                            <label for="q1-4" class="radio-label block w-full py-3 text-center border-2 border-gray-200 rounded-lg cursor-pointer hover:border-brand-light font-bold text-gray-400">4</label>
+                        </div>
+                        <div class="flex-1">
+                            <input type="radio" id="q1-5" name="q1" value="5" class="hidden">
+                            <label for="q1-5" class="radio-label block w-full py-3 text-center border-2 border-gray-200 rounded-lg cursor-pointer hover:border-brand-light font-bold text-gray-400">5</label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Question 2: Balance -->
+                <div class="bg-gray-50 p-6 rounded-xl shadow-sm border border-gray-100">
+                    <h3 class="text-lg font-bold text-gray-900 mb-4 flex items-center">
+                        <span class="bg-brand text-white w-8 h-8 rounded-full flex items-center justify-center mr-3 text-sm">Q2</span>
+                        毎食「主食・主菜・副菜」の3点セットを揃えていますか？
+                    </h3>
+                    <div class="grid grid-cols-5 gap-2 text-center">
+                        <div class="col-span-1 text-xs text-gray-400 mb-1">全く違う</div>
+                        <div class="col-span-3"></div>
+                        <div class="col-span-1 text-xs text-gray-400 mb-1">とてもそう思う</div>
+                    </div>
+                    <div class="flex justify-between items-center gap-2">
+                        <div class="flex-1"><input type="radio" id="q2-1" name="q2" value="1" class="hidden" required><label for="q2-1" class="radio-label block w-full py-3 text-center border-2 border-gray-200 rounded-lg cursor-pointer hover:border-brand-light font-bold text-gray-400">1</label></div>
+                        <div class="flex-1"><input type="radio" id="q2-2" name="q2" value="2" class="hidden"><label for="q2-2" class="radio-label block w-full py-3 text-center border-2 border-gray-200 rounded-lg cursor-pointer hover:border-brand-light font-bold text-gray-400">2</label></div>
+                        <div class="flex-1"><input type="radio" id="q2-3" name="q2" value="3" class="hidden"><label for="q2-3" class="radio-label block w-full py-3 text-center border-2 border-gray-200 rounded-lg cursor-pointer hover:border-brand-light font-bold text-gray-400">3</label></div>
+                        <div class="flex-1"><input type="radio" id="q2-4" name="q2" value="4" class="hidden"><label for="q2-4" class="radio-label block w-full py-3 text-center border-2 border-gray-200 rounded-lg cursor-pointer hover:border-brand-light font-bold text-gray-400">4</label></div>
+                        <div class="flex-1"><input type="radio" id="q2-5" name="q2" value="5" class="hidden"><label for="q2-5" class="radio-label block w-full py-3 text-center border-2 border-gray-200 rounded-lg cursor-pointer hover:border-brand-light font-bold text-gray-400">5</label></div>
+                    </div>
+                </div>
+
+                <!-- Question 3: Vegetables -->
+                <div class="bg-gray-50 p-6 rounded-xl shadow-sm border border-gray-100">
+                    <h3 class="text-lg font-bold text-gray-900 mb-4 flex items-center">
+                        <span class="bg-brand text-white w-8 h-8 rounded-full flex items-center justify-center mr-3 text-sm">Q3</span>
+                        1日に手のひら両手分（約350g）の野菜を食べていますか？
+                    </h3>
+                    <div class="grid grid-cols-5 gap-2 text-center">
+                        <div class="col-span-1 text-xs text-gray-400 mb-1">全く違う</div>
+                        <div class="col-span-3"></div>
+                        <div class="col-span-1 text-xs text-gray-400 mb-1">とてもそう思う</div>
+                    </div>
+                    <div class="flex justify-between items-center gap-2">
+                        <div class="flex-1"><input type="radio" id="q3-1" name="q3" value="1" class="hidden" required><label for="q3-1" class="radio-label block w-full py-3 text-center border-2 border-gray-200 rounded-lg cursor-pointer hover:border-brand-light font-bold text-gray-400">1</label></div>
+                        <div class="flex-1"><input type="radio" id="q3-2" name="q3" value="2" class="hidden"><label for="q3-2" class="radio-label block w-full py-3 text-center border-2 border-gray-200 rounded-lg cursor-pointer hover:border-brand-light font-bold text-gray-400">2</label></div>
+                        <div class="flex-1"><input type="radio" id="q3-3" name="q3" value="3" class="hidden"><label for="q3-3" class="radio-label block w-full py-3 text-center border-2 border-gray-200 rounded-lg cursor-pointer hover:border-brand-light font-bold text-gray-400">3</label></div>
+                        <div class="flex-1"><input type="radio" id="q3-4" name="q3" value="4" class="hidden"><label for="q3-4" class="radio-label block w-full py-3 text-center border-2 border-gray-200 rounded-lg cursor-pointer hover:border-brand-light font-bold text-gray-400">4</label></div>
+                        <div class="flex-1"><input type="radio" id="q3-5" name="q3" value="5" class="hidden"><label for="q3-5" class="radio-label block w-full py-3 text-center border-2 border-gray-200 rounded-lg cursor-pointer hover:border-brand-light font-bold text-gray-400">5</label></div>
+                    </div>
+                </div>
+
+                <!-- Question 4: Self Control (Snacking/Alcohol) -->
+                <div class="bg-gray-50 p-6 rounded-xl shadow-sm border border-gray-100">
+                    <h3 class="text-lg font-bold text-gray-900 mb-4 flex items-center">
+                        <span class="bg-brand text-white w-8 h-8 rounded-full flex items-center justify-center mr-3 text-sm">Q4</span>
+                        甘い飲み物、お菓子、お酒の量は適切にコントロールできていますか？
+                    </h3>
+                    <div class="grid grid-cols-5 gap-2 text-center">
+                        <div class="col-span-1 text-xs text-gray-400 mb-1">全く違う</div>
+                        <div class="col-span-3"></div>
+                        <div class="col-span-1 text-xs text-gray-400 mb-1">とてもそう思う</div>
+                    </div>
+                    <div class="flex justify-between items-center gap-2">
+                        <div class="flex-1"><input type="radio" id="q4-1" name="q4" value="1" class="hidden" required><label for="q4-1" class="radio-label block w-full py-3 text-center border-2 border-gray-200 rounded-lg cursor-pointer hover:border-brand-light font-bold text-gray-400">1</label></div>
+                        <div class="flex-1"><input type="radio" id="q4-2" name="q4" value="2" class="hidden"><label for="q4-2" class="radio-label block w-full py-3 text-center border-2 border-gray-200 rounded-lg cursor-pointer hover:border-brand-light font-bold text-gray-400">2</label></div>
+                        <div class="flex-1"><input type="radio" id="q4-3" name="q4" value="3" class="hidden"><label for="q4-3" class="radio-label block w-full py-3 text-center border-2 border-gray-200 rounded-lg cursor-pointer hover:border-brand-light font-bold text-gray-400">3</label></div>
+                        <div class="flex-1"><input type="radio" id="q4-4" name="q4" value="4" class="hidden"><label for="q4-4" class="radio-label block w-full py-3 text-center border-2 border-gray-200 rounded-lg cursor-pointer hover:border-brand-light font-bold text-gray-400">4</label></div>
+                        <div class="flex-1"><input type="radio" id="q4-5" name="q4" value="5" class="hidden"><label for="q4-5" class="radio-label block w-full py-3 text-center border-2 border-gray-200 rounded-lg cursor-pointer hover:border-brand-light font-bold text-gray-400">5</label></div>
+                    </div>
+                </div>
+
+                <!-- Question 5: Volume (Hara Hachi Bu) -->
+                <div class="bg-gray-50 p-6 rounded-xl shadow-sm border border-gray-100">
+                    <h3 class="text-lg font-bold text-gray-900 mb-4 flex items-center">
+                        <span class="bg-brand text-white w-8 h-8 rounded-full flex items-center justify-center mr-3 text-sm">Q5</span>
+                        毎食、満腹になるまで食べず「腹八分目」で終えていますか？
+                    </h3>
+                    <div class="grid grid-cols-5 gap-2 text-center">
+                        <div class="col-span-1 text-xs text-gray-400 mb-1">全く違う</div>
+                        <div class="col-span-3"></div>
+                        <div class="col-span-1 text-xs text-gray-400 mb-1">とてもそう思う</div>
+                    </div>
+                    <div class="flex justify-between items-center gap-2">
+                        <div class="flex-1"><input type="radio" id="q5-1" name="q5" value="1" class="hidden" required><label for="q5-1" class="radio-label block w-full py-3 text-center border-2 border-gray-200 rounded-lg cursor-pointer hover:border-brand-light font-bold text-gray-400">1</label></div>
+                        <div class="flex-1"><input type="radio" id="q5-2" name="q5" value="2" class="hidden"><label for="q5-2" class="radio-label block w-full py-3 text-center border-2 border-gray-200 rounded-lg cursor-pointer hover:border-brand-light font-bold text-gray-400">2</label></div>
+                        <div class="flex-1"><input type="radio" id="q5-3" name="q5" value="3" class="hidden"><label for="q5-3" class="radio-label block w-full py-3 text-center border-2 border-gray-200 rounded-lg cursor-pointer hover:border-brand-light font-bold text-gray-400">3</label></div>
+                        <div class="flex-1"><input type="radio" id="q5-4" name="q5" value="4" class="hidden"><label for="q5-4" class="radio-label block w-full py-3 text-center border-2 border-gray-200 rounded-lg cursor-pointer hover:border-brand-light font-bold text-gray-400">4</label></div>
+                        <div class="flex-1"><input type="radio" id="q5-5" name="q5" value="5" class="hidden"><label for="q5-5" class="radio-label block w-full py-3 text-center border-2 border-gray-200 rounded-lg cursor-pointer hover:border-brand-light font-bold text-gray-400">5</label></div>
+                    </div>
+                </div>
+
+                <div class="pt-8">
+                    <button type="button" onclick="calculateResults()" class="w-full flex justify-center py-4 px-4 border border-transparent rounded-full shadow-sm text-xl font-bold text-white bg-brand hover:bg-brand-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand transform transition hover:scale-105 duration-200">
+                        結果を診断する
+                    </button>
+                    <p id="error-msg" class="text-red-500 text-center mt-2 hidden">すべての質問にお答えください。</p>
+                </div>
+            </form>
+        </div>
+    </section>
+
+    <!-- Result Section (Initially Hidden) -->
+    <section id="result" class="hidden py-16 bg-gray-900 text-white relative overflow-hidden">
+        <div class="absolute top-0 left-0 w-full h-full opacity-10 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]"></div>
+        
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+            <div class="text-center mb-10">
+                <h2 class="text-3xl font-extrabold sm:text-4xl text-brand-light">診断結果</h2>
+                <p class="mt-4 text-xl">あなたの栄養バランスチャート</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-10 items-center">
+                <!-- Chart Container -->
+                <div class="bg-white rounded-2xl p-4 shadow-2xl flex justify-center items-center">
+                    <div class="w-full max-w-md aspect-square relative">
+                        <canvas id="radarChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Analysis Text -->
+                <div class="space-y-6">
+                    <div>
+                        <h3 class="text-2xl font-bold text-white mb-2">総合評価: <span id="total-score-text" class="text-brand-light text-3xl"></span></h3>
+                        <p id="feedback-main" class="text-gray-300 leading-relaxed"></p>
+                    </div>
+
+                    <div class="bg-gray-800 rounded-lg p-6 border border-gray-700">
+                        <h4 class="font-bold text-brand-light mb-2">💡 あなたへのアドバイス</h4>
+                        <p id="feedback-advice" class="text-sm text-gray-300"></p>
+                    </div>
+
+                    <div class="pt-4">
+                        <a href="#" class="block w-full text-center px-6 py-4 border border-transparent text-lg font-medium rounded-md text-gray-900 bg-brand-light hover:bg-brand transition shadow-lg">
+                            栄養士に詳しく相談する（無料）
+                        </a>
+                        <p class="text-xs text-center text-gray-500 mt-2">※これはデモ用のリンクです</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="mt-12 text-center">
+                <button onclick="resetSurvey()" class="text-gray-400 hover:text-white underline">もう一度診断する</button>
+            </div>
+        </div>
+    </section>
+
+    <footer class="bg-white border-t border-gray-200">
+        <div class="max-w-7xl mx-auto py-8 px-4 sm:px-6 md:flex md:items-center md:justify-between lg:px-8">
+            <div class="flex justify-center space-x-6 md:order-2">
+                <a href="#" class="text-gray-400 hover:text-gray-500">
+                    <span class="sr-only">Twitter</span>
+                    <!-- Icon placeholder -->
+                </a>
+            </div>
+            <div class="mt-8 md:mt-0 md:order-1">
+                <p class="text-center text-base text-gray-400">&copy; 2024 Nutrition Check Demo. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        let myRadarChart = null;
+
+        function calculateResults() {
+            // Get values
+            const q1 = document.querySelector('input[name="q1"]:checked')?.value;
+            const q2 = document.querySelector('input[name="q2"]:checked')?.value;
+            const q3 = document.querySelector('input[name="q3"]:checked')?.value;
+            const q4 = document.querySelector('input[name="q4"]:checked')?.value;
+            const q5 = document.querySelector('input[name="q5"]:checked')?.value;
+
+            // Validation
+            if (!q1 || !q2 || !q3 || !q4 || !q5) {
+                document.getElementById('error-msg').classList.remove('hidden');
+                return;
+            } else {
+                document.getElementById('error-msg').classList.add('hidden');
+            }
+
+            // Data array
+            const dataValues = [parseInt(q1), parseInt(q2), parseInt(q3), parseInt(q4), parseInt(q5)];
+            const labels = ['規則正しさ', '栄養バランス', '野菜摂取', '自制心', '腹八分目'];
+            
+            // Calculate total score for simple feedback logic
+            const totalScore = dataValues.reduce((a, b) => a + b, 0);
+            
+            // Show result section
+            const resultSection = document.getElementById('result');
+            resultSection.classList.remove('hidden');
+            resultSection.scrollIntoView({ behavior: 'smooth' });
+
+            // Generate Chart
+            renderChart(labels, dataValues);
+            
+            // Generate Feedback
+            generateFeedback(totalScore, dataValues, labels);
+        }
+
+        function renderChart(labels, data) {
+            const ctx = document.getElementById('radarChart').getContext('2d');
+            
+            // Destroy existing chart if any
+            if (myRadarChart) {
+                myRadarChart.destroy();
+            }
+
+            myRadarChart = new Chart(ctx, {
+                type: 'radar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'あなたの栄養スコア',
+                        data: data,
+                        fill: true,
+                        backgroundColor: 'rgba(34, 197, 94, 0.2)', // brand color with opacity
+                        borderColor: '#22C55E',
+                        pointBackgroundColor: '#22C55E',
+                        pointBorderColor: '#fff',
+                        pointHoverBackgroundColor: '#fff',
+                        pointHoverBorderColor: '#22C55E'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    elements: {
+                        line: {
+                            borderWidth: 3
+                        }
+                    },
+                    scales: {
+                        r: {
+                            angleLines: {
+                                display: true
+                            },
+                            suggestedMin: 0,
+                            suggestedMax: 5,
+                            ticks: {
+                                stepSize: 1,
+                                backdropColor: 'transparent'
+                            },
+                            pointLabels: {
+                                font: {
+                                    size: 14,
+                                    family: "'Noto Sans JP', sans-serif",
+                                    weight: 'bold'
+                                },
+                                color: '#333'
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    }
+                }
+            });
+        }
+
+        function generateFeedback(total, values, labels) {
+            const scoreText = document.getElementById('total-score-text');
+            const mainText = document.getElementById('feedback-main');
+            const adviceText = document.getElementById('feedback-advice');
+
+            // Find lowest score index
+            const minVal = Math.min(...values);
+            const weakIndices = values.map((val, idx) => val === minVal ? idx : -1).filter(idx => idx !== -1);
+            const weakPoint = labels[weakIndices[0]]; // Get the first weakest point
+
+            // Score classification
+            let rank = '';
+            if (total >= 22) {
+                rank = '素晴らしい！ Sランク';
+                mainText.innerText = "非常に優秀な食生活です！この調子で現在の習慣を維持しましょう。微調整を行うだけで、さらに健康的な体を手に入れられます。";
+            } else if (total >= 15) {
+                rank = 'あともう少し！ Aランク';
+                mainText.innerText = "基本的な意識はできています。あと少し改善すれば完璧です。苦手な部分を意識的にカバーしてみましょう。";
+            } else {
+                rank = '改善の余地あり Bランク';
+                mainText.innerText = "食生活が乱れている可能性があります。今のままでは体調や集中力に影響が出るかもしれません。できることから一つずつ始めましょう。";
+            }
+            scoreText.innerText = rank;
+
+            // Specific advice based on weak point
+            let advice = "";
+            switch(weakPoint) {
+                case '規則正しさ':
+                    advice = "体内時計が乱れています。まずは「朝食を少しでも食べる」「夕食を寝る3時間前までに済ませる」ことから始めましょう。";
+                    break;
+                case '栄養バランス':
+                    advice = "炭水化物ばかりになっていませんか？定食スタイル（ご飯、味噌汁、おかず）を意識するか、コンビニでもサラダやチキンを一品追加してみましょう。";
+                    break;
+                case '野菜摂取':
+                    advice = "野菜不足はビタミン・ミネラル不足に直結します。毎食、野菜のおかずを「1皿」プラスするか、具沢山の味噌汁を取り入れてみましょう。";
+                    break;
+                case '自制心':
+                    advice = "間食や糖質の摂りすぎに注意。お菓子を買う頻度を減らすか、ナッツやハイカカオチョコレートなど、質の良い間食に置き換えてみてください。";
+                    break;
+                case '腹八分目':
+                    advice = "早食いが満腹感を感じにくくさせているかもしれません。一口30回噛むこと、スマホを見ながら食べないことを意識してみましょう。";
+                    break;
+                default:
+                    advice = "全体的にバランスよく底上げしていきましょう。まずは1日3食しっかり食べることから！";
+            }
+            adviceText.innerText = `特に「${weakPoint}」のスコアが低めでした。${advice}`;
+        }
+
+        function resetSurvey() {
+            document.getElementById('nutritionForm').reset();
+            document.getElementById('result').classList.add('hidden');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+    </script>
+</body>
+</html>
