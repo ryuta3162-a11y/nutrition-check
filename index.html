@@ -227,6 +227,15 @@
                     </div>
                 </div>
 
+                <!-- ★修正①：自由記述欄の追加 -->
+                <div class="bg-gray-50 p-6 rounded-xl shadow-sm border border-gray-100">
+                    <h3 class="text-lg font-bold text-gray-900 mb-4 flex items-center">
+                        <span class="bg-gray-400 text-white w-14 h-8 rounded-full flex items-center justify-center mr-3 text-xs">任意</span>
+                        その他、食生活で気になっていることや悩みがあればご記入ください
+                    </h3>
+                    <textarea id="free-comment" rows="4" class="w-full p-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand focus:border-transparent outline-none transition" placeholder="例：最近疲れが取れにくい、肌荒れが気になる、具体的な改善レシピが知りたい..."></textarea>
+                </div>
+
                 <div class="pt-8">
                     <button type="button" onclick="calculateResults()" class="w-full flex justify-center py-4 px-4 border border-transparent rounded-full shadow-sm text-xl font-bold text-white bg-brand hover:bg-brand-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand transform transition hover:scale-105 duration-200">
                         結果を診断する
@@ -268,8 +277,9 @@
                     </div>
 
                     <div class="pt-4">
+                        <!-- ★修正②：ボタン文言の変更 -->
                         <a href="#" class="block w-full text-center px-6 py-4 border border-transparent text-lg font-medium rounded-md text-gray-900 bg-brand-light hover:bg-brand transition shadow-lg">
-                            栄養士に詳しく相談する（無料）
+                            管理栄養士に詳しく相談する（無料）
                         </a>
                         <p class="text-xs text-center text-gray-500 mt-2">※これはデモ用のリンクです</p>
                     </div>
